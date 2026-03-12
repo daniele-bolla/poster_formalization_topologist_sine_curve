@@ -1,0 +1,20 @@
+# LaTeX auxiliary files to ignore
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.lol
+*.bbl-SAVE-ERROR
+*.bcf-SAVE-ERROR
+# Keep the main PDF file
+!main.pdf
+
