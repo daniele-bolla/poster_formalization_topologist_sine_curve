@@ -2,198 +2,207 @@
     \begin{columns}[t]
 
         % ------------------------------------------------
-        % COLUMN 1
+        % COLUMN 1: Setup & Graph & Part 1 Intro
         % ------------------------------------------------
-
-        \begin{column}{0.32\textwidth}
+        \begin{column}{0.31\textwidth}
 
             \begin{block}{Introduction \& Setup}
+                The \textbf{topologist's sine curve} is a classical counterexample in topology illustrating that:
 
-                The \textbf{topologist's sine curve} is a classical counterexample in topology illustrating that
 
                 $$
                     \text{Connected} \;\not\Rightarrow\; \text{Path Connected}.
                 $$
 
-                Following the informal exposition in \textbf{K. Conrad's paper}, and under the supervision of \textbf{Prof. David Loeffler}, this project formalizes the result. The generalized theorem has now been successfully \textbf{merged}.
 
                 We define the sets as subsets of $\mathbb{R}^2$:
 
                 \begin{lstlisting}
+def pos_real := Ioi (0 : ℝ) -- (0, ∞)
+noncomputable def sine_curve := fun x ↦ (x, sin (x⁻¹))
 def S : Set (ℝ × ℝ) := sine_curve '' pos_real
-def Z : Set (ℝ × ℝ) := {(0,0)}
+def Z : Set (ℝ × ℝ) := { (0, 0) }
 def T : Set (ℝ × ℝ) := S ∪ Z
 \end{lstlisting}
-
             \end{block}
 
             \begin{block}{The Topologist's Sine Curve}
-
-                \vspace{0.5cm}
-                \begin{center}
+                \vspace{0.25cm}
+                \begin{figure}
+                    \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            \addplot [curveblue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [curveblue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
-                            % The Origin
+                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
                         \end{axis}
                     \end{tikzpicture}
-                \end{center}
-                \vspace{0.5cm}
-
+                    \caption{Graph of $S = \{(x, \sin(1/x)) : x > 0\}$ with the origin.}
+                \end{figure}
+                \vspace{0.25cm}
                 The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$. Adding the origin produces the space $T = S \cup \{(0,0)\}$.
-
             \end{block}
 
             \begin{block}{Part 1: $T$ is Connected}
+                $S$ is connected because it is the continuous image of $(0, \infty)$.
+                Since every subset between a connected space and its closure is connected
+                ($S \subseteq T \subseteq \overline{S}$), $T$ must also be connected.
 
-                $S$ is the continuous image of $(0,\infty)$. This reduces to a single explicit proof term by chaining continuity lemmas with the reverse application operator:
-
+                To prove $(0,0) \in \overline{S}$, we construct the sequence $f(n) = (\frac{1}{n\pi}, 0)$ and with
+                \texttt{Tendsto}, we prove the closure limit:
                 \begin{lstlisting}
-lemma S_is_conn : IsConnected S :=
-  isConnected_Ioi.image sine_curve <|
+let f : ℕ → ℝ × ℝ := fun n => ((n * Real.pi)⁻¹, 0)
+lemma T_sub_cls_S : T ⊆ closure S := ... -- via Tendsto f
+\end{lstlisting}
+                We compress the argument using
+                \texttt{IsConnected.subset\_closure}, requiring three proofs:
+                \begin{itemize}
+                    \item \textbf{$S$ is connected:} Chaining continuity lemmas via (\texttt{<|}).
+                    \item \textbf{$S \subseteq T$:} Solved trivially by \texttt{tauto\_set}.
+                    \item \textbf{$T \subseteq \overline{S}$:} Provided by our sequence lemma.
+                \end{itemize}
+
+                \begin{lstlisting}[language=lean]
+theorem T_is_conn : IsConnected T :=
+  IsConnected.subset_closure (isConnected_Ioi.image sine_curve <|
     continuous_id.continuousOn.prodMk <|
-    continuous_sin.comp_continuousOn <| ...
+    Real.continuous_sin.comp_continuousOn <|
+    ContinuousOn.inv₀ continuous_id.continuousOn
+    (fun _ hx => ne_of_gt hx)) (by tauto_set) T_sub_cls_S
 \end{lstlisting}
-
-                Since $S \subseteq T \subseteq \overline{S}$, $T$ is also connected.
-                To prove $(0,0) \in \overline{S}$, we construct the sequence $f(n) = (\frac{1}{n\pi}, 0)$, which remains in $S$ because $\sin(n\pi) = 0$.
-
-                Filters expresses this naturally:
-
-                \begin{lstlisting}
-let f : ℕ → ℝ × ℝ :=
-  fun n => ((n * Real.pi)⁻¹, 0)
-
-have hf : Tendsto f atTop (𝓝 (0,0)) := ...
-have hf' : ∀ᶠ n in atTop, f n ∈ S := ...
-\end{lstlisting}
-
             \end{block}
-
         \end{column}
 
         % ------------------------------------------------
-        % COLUMN 2
+        % COLUMN 2: Part 1 Cont. & Part 2
         % ------------------------------------------------
+        \begin{column}{0.31\textwidth}
 
-        \begin{column}{0.32\textwidth}
+            \begin{block}{Part 2: $T$ is Not Path-Connected}
+                If a path connects $S$ to $Z$, its $y$-coordinate must oscillate infinitely between $-1$ and $1$. This infinite oscillation contradicts the continuity of the path. We formalize this by contradiction:
 
-            \begin{block}{Part 2: Path-Connectedness \& API Friction}
-
-                To prove that $T$ is not path-connected, assume there exists a continuous path $p : [0,1] \to T$ connecting the origin $(0,0)$ to a point of $S$.
-
-                Define $t_0$ as the last time the path lies on the $y$-axis:
-
-                \begin{lstlisting}
-let t₀ : unitInterval :=
-  sSup {t | (p t).1 = 0}
+                \begin{lstlisting}[language=lean]
+theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
+  intro p_conn
+  -- Extract a continuous path p : [0,1] -> T
+  let p := JoinedIn.somePath p_conn
 \end{lstlisting}
 
-                \textbf{Subtype Friction:}
-                Working with paths requires evaluating over the \texttt{unitInterval} subtype.
-                Transferring inequalities to the underlying \texttt{ℝ} necessitates frequent
-                casting and lemmas like \texttt{Subtype.coe\_lt\_coe} to enable the \texttt{linarith} tactic.
-
-                \vspace{0.5cm}
-                Because the path is continuous at $t_0$, choosing $\varepsilon = 1/2$ bounds the path near $(0,0)$:
-
+                We define $t_0$ as the \textit{last time} the path lies on the $y$-axis:
                 \begin{lstlisting}
-obtain ⟨δ, hδ, ht⟩ :
-  ∃ δ > 0, ∀ t,
-  dist t t₀ < δ →
-  dist (p t) (p t₀) < 1/2
+  let t₀ : unitInterval := sSup {t | (p t).1 = 0}
 \end{lstlisting}
 
+                \textbf{Subtype Friction:} Transferring inequalities to the underlying $\mathbb{R}$ necessitates frequent casting (\texttt{Subtype.coe\_lt\_coe}) for \texttt{linarith}.
+
+                \vspace{0.25cm}
+                By continuity at $t_0$, for $\varepsilon = 1/2$, there exists a $\delta > 0$ such that the path remains strictly inside a ball of radius $1/2$:
+
+                \begin{lstlisting}
+  obtain ⟨δ, hδ, ht⟩ : ∃ δ > 0, ∀ t,
+    dist t t₀ < δ → dist (p t) (p t₀) < 1/2
+\end{lstlisting}
             \end{block}
 
             \begin{block}{Continuity Visualization}
-
-                \vspace{0.5cm}
-                \begin{center}
+                \vspace{0.25cm}
+                \begin{figure}
+                    \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            \addplot [curveblue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [curveblue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            % Draws a perfect circle natively in the data coordinates
-                            \draw [dotred, thick] (0,0) circle [radius=0.5];
+                            % The radius 1/2 ball
+                            \draw [dotred, thick, dashed] (0,0) circle [radius=0.5];
 
+                            % Highlight interval [0, a]
+                            \draw [dotred, line width=3pt] (0,0) -- (0.153,0);
+
+                            % p(t_0)
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
+                            \node[below left, dotred, font=\small] at (0,0) {$p(t_0)$};
+
+                            % p(t_1)
+                            \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0.153,0.25)};
+                            \node[above right, dotred, font=\small] at (0.153,0.25) {$p(t_1)$};
+
+                            % Drop line to 'a'
+                            \draw [dashed, gray, thick] (0.153,0.25) -- (0.153,0);
+                            \node[below, font=\small, dotred] at (0.153,-0.02) {$a$};
+
                         \end{axis}
                     \end{tikzpicture}
-                \end{center}
-                \vspace{0.5cm}
-
-                Immediately after $t_0$, the path must enter $S$.
-
-                Because the image of a connected set under the continuous $x$-coordinate map must be a connected subset of $\mathbb{R}$ (an interval), the path must cover an entire interval $[0,a]$ along the $x$-axis inside this small time window.
-
+                    \caption{A ball of radius $1/2$ showing $p(t_1)$ inside the $\delta$-neighborhood, covering the interval $[0, a]$.}
+                \end{figure}
             \end{block}
 
+            \begin{block}{Interval Coverage}
+                Immediately after $t_0$, the path enters $S$. We find a time $t_1 > t_0$ in the $\delta$-neighborhood, giving a curve point $a = x(p(t_1)) > 0$. Because the image of a connected set under a continuous map is an interval, the path covers $[0,a]$ on the $x$-axis:
+
+                \begin{lstlisting}[language=lean]
+  have Icc_of_a_b_sub_Icc_t₀_t₁:
+    Set.Icc 0 a ⊆ xcoord_path '' Set.Icc t₀ t₁ :=
+      IsConnected.Icc_subset ...
+\end{lstlisting}
+            \end{block}
         \end{column}
 
         % ------------------------------------------------
-        % COLUMN 3
+        % COLUMN 3: Oscillation Peaks & Conclusion
         % ------------------------------------------------
-
-        \begin{column}{0.32\textwidth}
+        \begin{column}{0.31\textwidth}
 
             \begin{block}{The Contradiction: Oscillation Peaks}
-
-                To cover the interval $[0,a]$, the path must encounter the infinite oscillations of the sine curve.
-
-                We isolate the sequence of points where $\sin(1/x) = 1$:
+                To cover $[0,a]$, the path traverses the infinite oscillations. We isolate the peaks where $\sin(\theta) = 1$:
 
                 \begin{lstlisting}
-noncomputable def xs_pos_peak :=
-  fun (k : ℕ) =>
-    2 / ((4 * k + 1) * Real.pi)
+  noncomputable def xs_pos_peak :=
+    fun (k : ℕ) => 2 / ((4 * k + 1) * Real.pi)
 \end{lstlisting}
 
-                \vspace{0.5cm}
-                \begin{center}
+                \vspace{0.25cm}
+                \begin{figure}
+                    \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            % Dashed line at y=1, expanded left and right to match new padding
                             \draw[gray, dashed, thick] (-0.55, 1) -- (1.15, 1);
                             \node[above, gray] at (-0.4, 1.0) {1};
 
-                            \addplot [curveblue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [curveblue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
 
-                            % Sequence of peaks: x = 2/((4k+1)pi)
                             \addplot [dotred, mark=*, mark size=1.8pt, only marks] coordinates {
                                     (0.6366, 1) (0.1273, 1) (0.0707, 1) (0.0489, 1)
                                     (0.0374, 1) (0.0303, 1) (0.0254, 1) (0.0219, 1) (0.0192, 1)
                                 };
                         \end{axis}
                     \end{tikzpicture}
-                \end{center}
-                \vspace{0.5cm}
+                    \caption{The sequence of peaks \texttt{xs\_pos\_peak} isolating $y = 1$.}
+                \end{figure}
+                \vspace{0.25cm}
 
-                These peaks approach $x = 0$, so we extract a time $t' \in [t_0, t_0 + \delta)$ where the path evaluates to the peak:
-
+                As $k \to \infty$, these $x$-values approach $0$. Thus, we can extract a time $t' \in [t_0, t_1]$ where the path hits a peak:
                 \begin{lstlisting}
-obtain ⟨t', ht', hpath_t'⟩ :
-  ∃ t' ∈ Set.Icc t₀ t₁, (p t').2 = 1 := ...
+  obtain ⟨t', ht', hpath_t'⟩ :
+    ∃ t' ∈ Set.Icc t₀ t₁, (p t').2 = 1 := ...
 \end{lstlisting}
 
-                Because the norm dominates the absolute value of any component, we have:
+                We use \texttt{calc} to formally prove that, since the $y$-coordinate is $1$, the distance from the origin is at least $1$:
 
-                $$
-                    \|p(t') - (0,0)\| \ge |p(t')_2| = 1 > 1/2,
-                $$
+                \begin{lstlisting}[language=lean]
+  have far : 1 ≤ dist (p t') (p t₀) := by
+    calc 1 = |(p t').2 - (p t₀).2| := by simp [hpath_t', hpt₀]
+         _ ≤ ‖p t' - p t₀‖         := norm_ge_abs_snd
+         _ = dist (p t') (p t₀)    := by rw [dist_eq_norm]
+\end{lstlisting}
 
-                contradicting the continuity bound that strictly keeps the path inside the ball of radius $1/2$. Therefore $T$ cannot be path-connected.
-
+                This directly contradicts the bound \texttt{dist (p t') (p t\_0) < 1/2}. Therefore, $T$ cannot be path-connected.
             \end{block}
 
-            \begin{block}{Conclusion}
-
-                Combining both arguments yields the final witness:
+            \begin{block}{Conclusion \& Reflections}
+                Combining both arguments yields the final theorem:
 
                 \begin{lstlisting}
 theorem T_is_conn_not_pathconn :
@@ -201,17 +210,16 @@ theorem T_is_conn_not_pathconn :
   ⟨T_is_conn, T_is_not_path_conn⟩
 \end{lstlisting}
 
-                A natural next step for future formalization is the \textbf{Warsaw circle}.
-            \end{block}
+                Mathlib allowed the formalization to closely mirror the informal reasoning.
+                In particular, Filters (\texttt{Tendsto}) proved exceptionally intuitive for establishing limits arguments.
+                The primary friction encountered was Mathlib's use of the \texttt{unitInterval} subtype as mentioned.
 
-            \begin{block}{References}
 
-                \begin{itemize}
-                    \item K. Conrad — \textit{Connected but not Path-Connected}
-                    \item Lean Prover Community Documentation \\
-                          \texttt{https://leanprover-community.github.io}
-                \end{itemize}
+                These compiling lines stand as a fully verified witness,
+                showcasing how formal reasoning makes mathematics rigorous and automatically verifiable.
 
+                \vspace{0.5cm}
+                \textit{Reference: K. Conrad — Connected but not Path-Connected}
             \end{block}
 
         \end{column}
