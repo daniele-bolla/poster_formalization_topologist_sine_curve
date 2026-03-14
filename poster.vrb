@@ -24,9 +24,7 @@ def S : Set (ℝ × ℝ) := sine_curve '' pos_real
 def Z : Set (ℝ × ℝ) := { (0, 0) }
 def T : Set (ℝ × ℝ) := S ∪ Z
 \end{lstlisting}
-            \end{block}
 
-            \begin{block}{The Topologist's Sine Curve}
                 \vspace{0.25cm}
                 \begin{figure}
                     \centering
@@ -37,7 +35,7 @@ def T : Set (ℝ × ℝ) := S ∪ Z
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
                         \end{axis}
                     \end{tikzpicture}
-                    \caption{Graph of $S = \{(x, \sin(1/x)) : x > 0\}$ with the origin.}
+                    \caption{Graph of $T$}
                 \end{figure}
                 \vspace{0.25cm}
                 The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$. Adding the origin produces the space $T = S \cup \{(0,0)\}$.
@@ -74,12 +72,14 @@ theorem T_is_conn : IsConnected T :=
         \end{column}
 
         % ------------------------------------------------
-        % COLUMN 2: Part 1 Cont. & Part 2
+        % COLUMN 2: Part 2
         % ------------------------------------------------
         \begin{column}{0.31\textwidth}
-
             \begin{block}{Part 2: $T$ is Not Path-Connected}
-                If a path connects $S$ to $Z$, its $y$-coordinate must oscillate infinitely between $-1$ and $1$. This infinite oscillation contradicts the continuity of the path. We formalize this by contradiction:
+                If a path connects $S$ to $Z$, its $y$-coordinate
+                must oscillate infinitely between $-1$ and $1$ as  its $x$-coordinate approaches $0$.
+                This infinite oscillation contradicts the continuity of the path.
+                We formalize this by contradiction:
 
                 \begin{lstlisting}[language=lean]
 theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
@@ -93,7 +93,7 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
   let t₀ : unitInterval := sSup {t | (p t).1 = 0}
 \end{lstlisting}
 
-                \textbf{Subtype Friction:} Transferring inequalities to the underlying $\mathbb{R}$ necessitates frequent casting (\texttt{Subtype.coe\_lt\_coe}) for \texttt{linarith}.
+                % \textbf{Subtype Friction:} Transferring inequalities to the underlying $\mathbb{R}$ necessitates frequent casting (\texttt{Subtype.coe\_lt\_coe}) for \texttt{linarith}.
 
                 \vspace{0.25cm}
                 By continuity at $t_0$, for $\varepsilon = 1/2$, there exists a $\delta > 0$ such that the path remains strictly inside a ball of radius $1/2$:
@@ -102,9 +102,36 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
   obtain ⟨δ, hδ, ht⟩ : ∃ δ > 0, ∀ t,
     dist t t₀ < δ → dist (p t) (p t₀) < 1/2
 \end{lstlisting}
-            \end{block}
+                \vspace{0.25cm}
+                \begin{figure}
+                    \centering
+                    \begin{tikzpicture}
+                        \begin{axis}[sine axis]
+                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-            \begin{block}{Continuity Visualization}
+                            % The radius 1/2 ball
+                            \draw [dotred, thick, dashed] (0,0) circle [radius=0.5];
+
+                        \end{axis}
+                    \end{tikzpicture}
+                    \caption{A ball of radius $1/2$ around $p(t_0)$.}
+                \end{figure}
+
+                Immediately after $t_0$, the path enters $S$.
+                We find a time $t_1 > t_0$ in the $\delta$-neighborhood,
+                giving a curve point $a = x(p(t_1)) > 0$, where $x$ is the $x$-coordinate
+                function.
+                The image $x(p([t_0, t_1]))$ is connected and contains $b = 0 = x(p(t_0))$
+                and $a = x(p(t_1))$, and every connected subset of R is an interval, so
+                $[0, a] \subset x(p([t_0, t_1]))$.
+
+
+                \begin{lstlisting}[language=lean]
+  have Icc_of_a_b_sub_Icc_t₀_t₁:
+    Set.Icc 0 a ⊆ xcoord_path '' Set.Icc t₀ t₁ :=
+      IsConnected.Icc_subset ...
+\end{lstlisting}
                 \vspace{0.25cm}
                 \begin{figure}
                     \centering
@@ -133,27 +160,17 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
 
                         \end{axis}
                     \end{tikzpicture}
-                    \caption{A ball of radius $1/2$ showing $p(t_1)$ inside the $\delta$-neighborhood, covering the interval $[0, a]$.}
+                    \caption{The $\varepsilon$-ball around $p(t_0)$ contains $p(t_1)$ and covers the interval $[0, a]$.}
                 \end{figure}
-            \end{block}
-
-            \begin{block}{Interval Coverage}
-                Immediately after $t_0$, the path enters $S$. We find a time $t_1 > t_0$ in the $\delta$-neighborhood, giving a curve point $a = x(p(t_1)) > 0$. Because the image of a connected set under a continuous map is an interval, the path covers $[0,a]$ on the $x$-axis:
-
-                \begin{lstlisting}[language=lean]
-  have Icc_of_a_b_sub_Icc_t₀_t₁:
-    Set.Icc 0 a ⊆ xcoord_path '' Set.Icc t₀ t₁ :=
-      IsConnected.Icc_subset ...
-\end{lstlisting}
             \end{block}
         \end{column}
 
         % ------------------------------------------------
-        % COLUMN 3: Oscillation Peaks & Conclusion
+        % COLUMN 3: Contradiction & Conclusion
         % ------------------------------------------------
         \begin{column}{0.31\textwidth}
 
-            \begin{block}{The Contradiction: Oscillation Peaks}
+            \begin{block}{The Contradiction}
                 To cover $[0,a]$, the path traverses the infinite oscillations. We isolate the peaks where $\sin(\theta) = 1$:
 
                 \begin{lstlisting}
