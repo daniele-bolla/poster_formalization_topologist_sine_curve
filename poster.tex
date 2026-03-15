@@ -79,7 +79,7 @@
         
         \begin{column}{0.25\paperwidth}
             \raggedleft
-            \includegraphics[height=9cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
+            \includegraphics[height=10cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
         \end{column}
         
         \begin{column}{0.04\paperwidth}\end{column}
@@ -240,7 +240,7 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
 
                 Immediately after $t_0$, the path enters $S$.
                 We find a time $t_1 > t_0$ in the $\delta$-neighborhood,
-                giving a curve point $a = x(p(t_1)) > 0$, where $x$ is the $x$-coordinate
+                giving a point $a = x(p(t_1)) > 0$, where $x$ is the $x$-coordinate
                 function.
                 The image $x(p([t_0, t_1]))$ is connected and contains $b = 0 = x(p(t_0))$
                 and $a = x(p(t_1))$, and every connected subset of R is an interval, so
@@ -290,12 +290,12 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
         % ------------------------------------------------
         \begin{column}{0.31\textwidth}
 
-            \begin{block}{The Contradiction}
-                To cover $[0,a]$, the path traverses the infinite oscillations. We isolate the peaks where $\sin(\theta) = 1$:
+            \begin{block}{The Contradiction: Oscillation Peaks}
+                To cover $[0,a]$, the path must traverse the infinite oscillations. We isolate the peaks where $y=1$ by defining the sequence $x_k = \frac{2}{(4k + 1)\pi}$:
 
                 \begin{lstlisting}
-  noncomputable def xs_pos_peak :=
-    fun (k : ℕ) => 2 / ((4 * k + 1) * Real.pi)
+noncomputable def xs_pos_peak :=
+  fun (k : ℕ) => 2 / ((4 * k + 1) * Real.pi)
 \end{lstlisting}
 
                 \vspace{0.25cm}
@@ -320,22 +320,23 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                 \end{figure}
                 \vspace{0.25cm}
 
-                As $k \to \infty$, these $x$-values approach $0$. Thus, we can extract a time $t' \in [t_0, t_1]$ where the path hits a peak:
+                As $k \to \infty$, these peaks approach $0$ and enter $[0, a]$. Since the path covers this interval, there must be a time $t' \in [t_0, t_1]$ where the path hits a peak:
+
                 \begin{lstlisting}
-  obtain ⟨t', ht', hpath_t'⟩ : 
-    ∃ t' ∈ Set.Icc t₀ t₁, (p t').2 = 1 := ...
+obtain ⟨t', ht', hpath_t'⟩ : 
+  ∃ t' ∈ Set.Icc t₀ t₁, (p t').2 = 1 := ...
 \end{lstlisting}
 
-                We use \texttt{calc} to formally prove that, since the $y$-coordinate is $1$, the distance from the origin is at least $1$:
+                Because $t' \in [t_0, t_1]$, our earlier continuity argument requires the distance to the origin to be $< 1/2$. However, using \texttt{calc}, we prove the distance must be at least $1$ since the $y$-coordinate is $1$:
 
                 \begin{lstlisting}[language=lean]
-  have far : 1 ≤ dist (p t') (p t₀) := by
-    calc 1 = |(p t').2 - (p t₀).2| := by simp [hpath_t', hpt₀]
-         _ ≤ ‖p t' - p t₀‖         := norm_ge_abs_snd
-         _ = dist (p t') (p t₀)    := by rw [dist_eq_norm]
+have far : 1 ≤ dist (p t') (p t₀) := by
+  calc 1 = |(p t').2 - (p t₀).2| := by simp [hpath_t', hpt₀]
+       _ ≤ ‖p t' - p t₀‖         := norm_ge_abs_snd
+       _ = dist (p t') (p t₀)    := by rw [dist_eq_norm]
 \end{lstlisting}
 
-                This directly contradicts the bound \texttt{dist (p t') (p t\_0) < 1/2}. Therefore, $T$ cannot be path-connected.
+                This contradiction proves $T$ cannot be path-connected.
             \end{block}
 
             \begin{block}{Conclusion \& Reflections}
@@ -343,17 +344,18 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
 
                 \begin{lstlisting}
 theorem T_is_conn_not_pathconn :
-  IsConnected T ∧ ¬IsPathConnected T :=
-  ⟨T_is_conn, T_is_not_path_conn⟩
+  IsConnected T ∧ ¬IsPathConnected T := ⟨T_is_conn, T_is_not_path_conn⟩
 \end{lstlisting}
 
-                Mathlib allowed the formalization to closely mirror the informal reasoning.
-                In particular, Filters (\texttt{Tendsto}) proved exceptionally intuitive for establishing limits arguments.
-                The primary friction encountered was Mathlib's use of the \texttt{unitInterval} subtype as mentioned.
+                Mathlib largely mirrors informal reasoning:
+                \texttt{T\_is\_not\_path\_conn} naturally uses contradiction,
+                filters (\texttt{Tendsto}) intuitively handle limits, and the metric space
+                \texttt{dist} was conveniently used.
 
+                The main friction is the \texttt{unitInterval} subtype,
+                as transferring inequalities to $\mathbb{R}$ requires cumbersome explicit casting.
 
-                These compiling lines stand as a fully verified witness,
-                showcasing how formal reasoning makes mathematics rigorous and automatically verifiable.
+                Ultimately, these compiling lines stand as a verified witness, showcasing how formal reasoning makes mathematics rigorous and automatically verifiable.
 
                 \vspace{0.5cm}
                 \textit{Reference: K. Conrad — Connected but not Path-Connected}
