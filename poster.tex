@@ -11,19 +11,17 @@
 \usepackage{pgfplots}
 \usepackage{listings}
 
-% Added package for generating the QR Code natively
 \usepackage{qrcode}
 
-% Added caption package to style the figure captions beautifully
 \usepackage{caption}
 \captionsetup{font=small, labelfont={bf, color=UniBlue}, justification=centering}
 
 % ----------------------------------------------------
 % COLORS
 % ----------------------------------------------------
-% Updated to the exact brand hex codes provided!
-\definecolor{UniBlue}{HTML}{004587}    % Darker blue for text/headers
-\definecolor{CurveBlue}{HTML}{0070BA}  % Lighter blue for the graph functions
+
+\definecolor{UniBlue}{HTML}{004587}    
+\definecolor{CurveBlue}{HTML}{0070BA}  
 \definecolor{LineBlue}{HTML}{C5D5E4}   
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -48,7 +46,6 @@
 
 \pgfplotsset{compat=1.17}
 
-% Shrunk graph width slightly to 0.55\linewidth to save space!
 \pgfplotsset{
     sine axis/.style={
         width=0.55\linewidth, 
@@ -155,7 +152,6 @@ def T : Set (ℝ × ℝ) := S ∪ Z
                     \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            % Now using the CurveBlue color
                             \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
@@ -249,7 +245,6 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                     \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            % Now using the CurveBlue color
                             \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
@@ -278,7 +273,7 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
         % ------------------------------------------------
         \begin{column}{0.31\textwidth}
 
-            \begin{block}{The Contradiction: Oscillation Peaks}
+            \begin{block}{The Contradiction}
                 To cover $[0,a]$, the path must traverse the infinite oscillations. We isolate the peaks where $y=1$ by defining the sequence $x_k = \frac{2}{(4k + 1)\pi}$:
 
                 \begin{lstlisting}
@@ -293,7 +288,6 @@ noncomputable def xs_pos_peak :=
                             \draw[gray, dashed, thick] (-0.55, 1) -- (1.15, 1);
                             \node[above, gray] at (-0.4, 1.0) {1};
 
-                            % Now using the CurveBlue color
                             \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
