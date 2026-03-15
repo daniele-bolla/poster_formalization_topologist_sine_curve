@@ -11,6 +11,9 @@
 \usepackage{pgfplots}
 \usepackage{listings}
 
+% Added package for generating the QR Code natively
+\usepackage{qrcode}
+
 % Added caption package to style the figure captions beautifully
 \usepackage{caption}
 \captionsetup{font=small, labelfont={bf, color=UniBlue}, justification=centering}
@@ -18,7 +21,9 @@
 % ----------------------------------------------------
 % COLORS
 % ----------------------------------------------------
-\definecolor{UniBlue}{HTML}{00508F}    
+% Updated to the exact brand hex codes provided!
+\definecolor{UniBlue}{HTML}{004587}    % Darker blue for text/headers
+\definecolor{CurveBlue}{HTML}{0070BA}  % Lighter blue for the graph functions
 \definecolor{LineBlue}{HTML}{C5D5E4}   
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -37,8 +42,8 @@
 \lstset{
     language=lean,
     basicstyle=\ttfamily\small, 
-    aboveskip=0.5ex, 
-    belowskip=0.5ex  
+    aboveskip=1.5ex, 
+    belowskip=1.5ex  
 }
 
 \pgfplotsset{compat=1.17}
@@ -64,35 +69,35 @@
 \setbeamertemplate{navigation symbols}{}     
 
 \setbeamertemplate{headline}{
-    \vspace{1.5cm} 
+    \vspace{1.0cm} 
     \begin{columns}[c]
         \begin{column}{0.03\paperwidth}\end{column} 
         
         \begin{column}{0.68\paperwidth}
             \raggedright
-            {\VeryHuge \textbf{\textcolor{UniBlue}{\inserttitle}} \par}
-            \vspace{0.7cm} 
-            {\Huge \textit{\textbf{\textcolor{UniBlue}{\insertauthor}}} \par}
-            \vspace{0.3cm} 
+            {\Huge \textbf{\textcolor{UniBlue}{\inserttitle}} \par}
+            \vspace{0.4cm} 
+            {\LARGE \textit{\textbf{\textcolor{UniBlue}{\insertauthor}}} \par}
+            \vspace{0.2cm} 
             {\Large \textcolor{UniBlue}{\insertinstitute} \par}
         \end{column}
         
         \begin{column}{0.25\paperwidth}
             \raggedleft
-            \includegraphics[height=10cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
+            \includegraphics[height=7.5cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
         \end{column}
         
         \begin{column}{0.04\paperwidth}\end{column}
     \end{columns}
     
-    \vspace{0.8cm} 
+    \vspace{0.5cm} 
     \begin{center}
         \begin{tikzpicture}
             \useasboundingbox (0,0) rectangle (0.94\paperwidth, 0);
             \draw[LineBlue, line width=4pt] (0,0) -- (0.94\paperwidth, 0);
         \end{tikzpicture}
     \end{center}
-    \vspace{0.5cm} 
+    \vspace{0.3cm} 
 }
 
 \setbeamertemplate{block begin}{
@@ -102,7 +107,7 @@
     {\color{black}} 
 }
 \setbeamertemplate{block end}{
-    \vspace{1.5ex} 
+    \vspace{2.5ex} 
 }
 
 % ----------------------------------------------------
@@ -114,6 +119,7 @@
 
 \begin{document}
 
+\setlength{\parskip}{0.5em}
 \setlength{\abovedisplayskip}{1ex}
 \setlength{\belowdisplayskip}{1ex}
 
@@ -145,19 +151,24 @@ def Z : Set (ℝ × ℝ) := { (0, 0) }
 def T : Set (ℝ × ℝ) := S ∪ Z
 \end{lstlisting}
 
-                \vspace{0.25cm}
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                            % Now using the CurveBlue color
+                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
+
+                            \draw[gray, thick] (-0.05, 1) -- (0.05, 1);
+                            \node[left, font=\small, text=gray] at (-0.05, 1) {$1$};
+                            \draw[gray, thick] (-0.05, -1) -- (0.05, -1);
+                            \node[left, font=\small, text=gray] at (-0.05, -1) {$-1$};
                         \end{axis}
                     \end{tikzpicture}
                     \caption{Graph of $T$}
                 \end{figure}
-                \vspace{0.25cm}
+
                 The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$. Adding the origin produces the space $T = S \cup \{(0,0)\}$.
             \end{block}
 
@@ -197,7 +208,7 @@ theorem T_is_conn : IsConnected T :=
         \begin{column}{0.31\textwidth}
             \begin{block}{Part 2: $T$ is Not Path-Connected}
                 If a path connects $S$ to $Z$, its $y$-coordinate
-                must oscillate infinitely between $-1$ and $1$ as  its $x$-coordinate approaches $0$.
+                must oscillate infinitely between $-1$ and $1$ as its $x$-coordinate approaches $0$.
                 This infinite oscillation contradicts the continuity of the path.
                 We formalize this by contradiction:
 
@@ -213,68 +224,45 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
   let t₀ : unitInterval := sSup {t | (p t).1 = 0}
 \end{lstlisting}
 
-                % \textbf{Subtype Friction:} Transferring inequalities to the underlying $\mathbb{R}$ necessitates frequent casting (\texttt{Subtype.coe\_lt\_coe}) for \texttt{linarith}.
-
-                \vspace{0.25cm}
                 By continuity at $t_0$, for $\varepsilon = 1/2$, there exists a $\delta > 0$ such that the path remains strictly inside a ball of radius $1/2$:
 
                 \begin{lstlisting}
   obtain ⟨δ, hδ, ht⟩ : ∃ δ > 0, ∀ t,
     dist t t₀ < δ → dist (p t) (p t₀) < 1/2
 \end{lstlisting}
-                \vspace{0.25cm}
-                \begin{figure}
-                    \centering
-                    \begin{tikzpicture}
-                        \begin{axis}[sine axis]
-                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
-
-                            % The radius 1/2 ball
-                            \draw [dotred, thick, dashed] (0,0) circle [radius=0.5];
-
-                        \end{axis}
-                    \end{tikzpicture}
-                    \caption{A ball of radius $1/2$ around $p(t_0)$.}
-                \end{figure}
 
                 Immediately after $t_0$, the path enters $S$.
                 We find a time $t_1 > t_0$ in the $\delta$-neighborhood,
                 giving a point $a = x(p(t_1)) > 0$, where $x$ is the $x$-coordinate
                 function.
-                The image $x(p([t_0, t_1]))$ is connected and contains $b = 0 = x(p(t_0))$
-                and $a = x(p(t_1))$, and every connected subset of R is an interval, so
-                $[0, a] \subset x(p([t_0, t_1]))$.
-
+                The image $x(p([t_0, t_1]))$ is connected and contains $0 = x(p(t_0))$
+                and $a = x(p(t_1))$. Since every connected subset of $\mathbb{R}$ is an interval,
+                $[0, a] \subseteq x(p([t_0, t_1]))$.
 
                 \begin{lstlisting}[language=lean]
   have Icc_of_a_b_sub_Icc_t₀_t₁: 
     Set.Icc 0 a ⊆ xcoord_path '' Set.Icc t₀ t₁ :=
       IsConnected.Icc_subset ...
 \end{lstlisting}
-                \vspace{0.25cm}
+
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
                         \begin{axis}[sine axis]
-                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                            % Now using the CurveBlue color
+                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            % The radius 1/2 ball
                             \draw [dotred, thick, dashed] (0,0) circle [radius=0.5];
-
-                            % Highlight interval [0, a]
+                            \draw [gray, thick, ->] (0,0) -- (-0.25, 0.433) node[midway, left=2pt, font=\small] {$1/2$};
                             \draw [dotred, line width=3pt] (0,0) -- (0.153,0);
 
-                            % p(t_0)
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
                             \node[below left, dotred, font=\small] at (0,0) {$p(t_0)$};
 
-                            % p(t_1)
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0.153,0.25)};
                             \node[above right, dotred, font=\small] at (0.153,0.25) {$p(t_1)$};
 
-                            % Drop line to 'a'
                             \draw [dashed, gray, thick] (0.153,0.25) -- (0.153,0);
                             \node[below, font=\small, dotred] at (0.153,-0.02) {$a$};
 
@@ -298,7 +286,6 @@ noncomputable def xs_pos_peak :=
   fun (k : ℕ) => 2 / ((4 * k + 1) * Real.pi)
 \end{lstlisting}
 
-                \vspace{0.25cm}
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
@@ -306,8 +293,9 @@ noncomputable def xs_pos_peak :=
                             \draw[gray, dashed, thick] (-0.55, 1) -- (1.15, 1);
                             \node[above, gray] at (-0.4, 1.0) {1};
 
-                            \addplot [UniBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [UniBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                            % Now using the CurveBlue color
+                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                            \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
                             \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
 
                             \addplot [dotred, mark=*, mark size=1.8pt, only marks] coordinates {
@@ -318,7 +306,6 @@ noncomputable def xs_pos_peak :=
                     \end{tikzpicture}
                     \caption{The sequence of peaks \texttt{xs\_pos\_peak} isolating $y = 1$.}
                 \end{figure}
-                \vspace{0.25cm}
 
                 As $k \to \infty$, these peaks approach $0$ and enter $[0, a]$. Since the path covers this interval, there must be a time $t' \in [t_0, t_1]$ where the path hits a peak:
 
@@ -344,21 +331,28 @@ have far : 1 ≤ dist (p t') (p t₀) := by
 
                 \begin{lstlisting}
 theorem T_is_conn_not_pathconn :
-  IsConnected T ∧ ¬IsPathConnected T := ⟨T_is_conn, T_is_not_path_conn⟩
+  IsConnected T ∧ ¬IsPathConnected T := 
+  ⟨T_is_conn, T_is_not_path_conn⟩
 \end{lstlisting}
 
-                Mathlib largely mirrors informal reasoning:
+                The formalization strictly follows K. Conrad's paper \textit{Connected but not Path-Connected}. Mathlib largely mirrors this informal reasoning:
                 \texttt{T\_is\_not\_path\_conn} naturally uses contradiction,
                 filters (\texttt{Tendsto}) intuitively handle limits, and the metric space
                 \texttt{dist} was conveniently used.
 
-                The main friction is the \texttt{unitInterval} subtype,
-                as transferring inequalities to $\mathbb{R}$ requires cumbersome explicit casting.
+                Working with the \texttt{unitInterval} subtype, required cumbersome explicit casting.
 
-                Ultimately, these compiling lines stand as a verified witness, showcasing how formal reasoning makes mathematics rigorous and automatically verifiable.
+                Ultimately, these compiling lines stand as a verified witness, showcasing how formal reasoning
+                makes mathematics rigorous and automatically verifiable.
 
-                \vspace{0.5cm}
-                \textit{Reference: K. Conrad — Connected but not Path-Connected}
+                \vspace{1.0cm}
+
+                \begin{center}
+                    \qrcode[height=3.5cm]{https://github.com/daniele-bolla/intro_to_formal_math_in_lean/blob/main/main.pdf} \\
+                    \vspace{0.3cm}
+                    \textbf{\small Read the full thesis}
+                \end{center}
+
             \end{block}
 
         \end{column}
