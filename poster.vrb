@@ -197,7 +197,7 @@ have far : 1 ≤ dist (p t') (p t₀) := by
                 This contradiction proves $T$ cannot be path-connected.
             \end{block}
 
-            \begin{block}{Conclusion \& Reflections}
+            \begin{block}{Conclusion}
                 Combining both arguments yields the final theorem:
 
                 \begin{lstlisting}
