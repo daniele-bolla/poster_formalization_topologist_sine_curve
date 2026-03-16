@@ -76,7 +76,11 @@
             \vspace{0.4cm} 
             {\LARGE \textit{\textbf{\textcolor{UniBlue}{\insertauthor}}} \par}
             \vspace{0.2cm} 
-            {\Large \textcolor{UniBlue}{\insertinstitute} \par}
+            % --- NEW: Added the Date/Thesis type here ---
+            {\Large \textcolor{UniBlue}{\insertdate} \par}
+            \vspace{0.1cm} 
+            % --- Changed to \large for a nice visual hierarchy ---
+            {\large \textcolor{UniBlue}{\insertinstitute} \par}
         \end{column}
         
         \begin{column}{0.25\paperwidth}
@@ -110,8 +114,9 @@
 % ----------------------------------------------------
 % DOCUMENT META-DATA
 % ----------------------------------------------------
-\title{Formalizing the Topologist's Sine Curve}
+\title{Formalizing the Topologist's Sine Curve in Lean}
 \author{Daniele Bolla (UniDistance Suisse)}
+\date{Mathematics Bachelor Thesis, Autumn 2025}
 \institute{Supervisor: Prof. David Loeffler}
 
 \begin{document}
@@ -154,7 +159,8 @@ def T : Set (ℝ × ℝ) := S ∪ Z
                         \begin{axis}[sine axis]
                             \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
-                            \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
+
+                            \addplot [dotred, mark=*, mark size=4pt] coordinates {(0,0)};
 
                             \draw[gray, thick] (-0.05, 1) -- (0.05, 1);
                             \node[left, font=\small, text=gray] at (-0.05, 1) {$1$};
@@ -244,22 +250,25 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
-                        \begin{axis}[sine axis]
-                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
+                        \begin{axis}[sine axis, xmin=-0.65, xmax=0.65, ymin=-0.65, ymax=0.65]
 
-                            \draw [dotred, thick, dashed] (0,0) circle [radius=0.5];
-                            \draw [gray, thick, ->] (0,0) -- (-0.25, 0.433) node[midway, left=2pt, font=\small] {$1/2$};
-                            \draw [dotred, line width=3pt] (0,0) -- (0.153,0);
+                            \addplot [CurveBlue!50, thin, domain=0.1:0.65, samples=150] {sin(deg(1/x))};
+                            \addplot [CurveBlue!50, thin, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
+                            \draw [dotred, line width=3pt, dashed] (0,0) circle [radius=0.5];
+
+                            \draw [gray, line width=2pt, ->] (0,0) -- (-0.25, 0.433) node[midway, left=4pt, font=\small, text=gray] {$1/2$};
+                            \draw [gray, line width=2pt, dashed] (0.153,0.25) -- (0.153,0);
+
+                            \draw [dotred, line width=4pt] (0,0) -- (0.153,0);
+
+                            \addplot [dotred, mark=*, mark size=5pt] coordinates {(0,0)};
                             \node[below left, dotred, font=\small] at (0,0) {$p(t_0)$};
 
-                            \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0.153,0.25)};
+                            \addplot [dotred, mark=*, mark size=5pt] coordinates {(0.153,0.25)};
                             \node[above right, dotred, font=\small] at (0.153,0.25) {$p(t_1)$};
 
-                            \draw [dashed, gray, thick] (0.153,0.25) -- (0.153,0);
-                            \node[below, font=\small, dotred] at (0.153,-0.02) {$a$};
+                            \node[below, font=\small, dotred] at (0.153,-0.05) {$a$};
 
                         \end{axis}
                     \end{tikzpicture}
@@ -284,15 +293,17 @@ noncomputable def xs_pos_peak :=
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
-                        \begin{axis}[sine axis]
-                            \draw[gray, dashed, thick] (-0.55, 1) -- (1.15, 1);
-                            \node[above, gray] at (-0.4, 1.0) {1};
+                        \begin{axis}[sine axis, xmin=-0.1, xmax=0.8, ymin=0.0, ymax=1.25]
 
-                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
-                            \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
-                            \addplot [dotred, mark=*, mark size=2.5pt] coordinates {(0,0)};
+                            \addplot [CurveBlue!50, thin, domain=0.1:0.8, samples=150] {sin(deg(1/x))};
+                            \addplot [CurveBlue!50, thin, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            \addplot [dotred, mark=*, mark size=1.8pt, only marks] coordinates {
+                            \draw[dotred, dashed, line width=3pt] (-0.1, 1) -- (0.8, 1);
+                            \node[above left, dotred, font=\small] at (0, 1.0) {$y=1$};
+
+                            \addplot [dotred, mark=*, mark size=5pt] coordinates {(0,0)};
+
+                            \addplot [dotred, mark=*, mark size=5pt, only marks] coordinates {
                                     (0.6366, 1) (0.1273, 1) (0.0707, 1) (0.0489, 1)
                                     (0.0374, 1) (0.0303, 1) (0.0254, 1) (0.0219, 1) (0.0192, 1)
                                 };
