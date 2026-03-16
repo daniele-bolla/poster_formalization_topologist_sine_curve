@@ -61,7 +61,7 @@ lemma T_sub_cls_S : T ⊆ closure S := ... -- via Tendsto f
                 \begin{itemize}
                     \item \textbf{$S$ is connected:} Chaining continuity lemmas via (\texttt{<|}).
                     \item \textbf{$S \subseteq T$:} Solved trivially by \texttt{tauto\_set}.
-                    \item \textbf{$T \subseteq \overline{S}$:} Provided by our sequence lemma.
+                    \item \textbf{$T \subseteq \overline{S}$:} Provided by \texttt{T\_sub\_cls\_S}.
                 \end{itemize}
 
                 \begin{lstlisting}[language=lean]
