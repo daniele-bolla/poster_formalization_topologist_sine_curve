@@ -79,12 +79,12 @@ def T : Set (ℝ × ℝ) := S ∪ Z
                             \addplot [CurveBlue, thick, domain=0.1:0.26, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            \addplot [dotred, mark=*, mark size=4pt] coordinates {(0,0)};
+                            \addplot [CurveBlue, mark=*, mark size=4pt] coordinates {(0,0)};
 
-                            \draw[gray, thick] (-0.006, 1) -- (0.006, 1);
-                            \node[left, font=\small, text=gray] at (-0.006, 1) {$1$};
-                            \draw[gray, thick] (-0.006, -1) -- (0.006, -1);
-                            \node[left, font=\small, text=gray] at (-0.006, -1) {$-1$};
+                            \draw[black, thick] (-0.006, 1) -- (0.006, 1);
+                            \node[left, font=\small, text=black] at (-0.006, 1) {$1$};
+                            \draw[black, thick] (-0.006, -1) -- (0.006, -1);
+                            \node[left, font=\small, text=black] at (-0.006, -1) {$-1$};
                         \end{axis}
                     \end{tikzpicture}
                     \caption{Graph of $T$}
@@ -95,9 +95,10 @@ def T : Set (ℝ × ℝ) := S ∪ Z
                 $S$ is connected as the continuous image of $(0,\infty)$.
                 A subset between a connected set and its closure is connected
                 ($S \subseteq T \subseteq \overline{S}$).
-                For the latter inclusion, it suffices to show $(0,0) \in \overline{S}$.
-                This follows from the sequence
-                $f(n) = \bigl(\tfrac{1}{n\pi},\, 0\bigr) \in S$ converging to the origin:
+                While the inclusion $S \subseteq T$ is trivially closed by the \texttt{tauto\_set} tactic,
+                establishing $T \subseteq \overline{S}$ requires us to formally prove $(0,0) \in \overline{S}$.
+                We achieve this by showing the sequence
+                $f(n) = \bigl(\tfrac{1}{n\pi},\, 0\bigr) \in S$ converges to the origin:
 
                 \begin{lstlisting}
 let f : ℕ → ℝ × ℝ := fun n => ((n * Real.pi)⁻¹, 0)
@@ -184,10 +185,10 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                             \draw [dotred, line width=3pt, dashed]
                             (-0.5,-0.5) rectangle (0.5,0.5);
 
-                            \draw [gray, line width=2pt, ->] (0,0) -- (0.5, 0)
-                            node[midway, below=4pt, font=\small, text=gray] {$1/2$};
-                            \draw [gray, line width=2pt, dashed] (0.153,0.25) -- (0.153,0);
+                            \draw [black, line width=2pt, ->] (0,0) -- (-0.5, 0)
+                            node[midway, below=4pt, font=\small, text=black] {$1/2$};
 
+                            \draw [gray, line width=2pt, dashed] (0.153,0.25) -- (0.153,0);
                             \draw [dotred, line width=4pt] (0,0) -- (0.153,0);
 
                             \addplot [dotred, mark=*, mark size=5pt] coordinates {(0,0)};
@@ -231,9 +232,9 @@ noncomputable def xs_pos_peak :=
                             \addplot [CurveBlue!50, thin, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
                             \draw[dotred, dashed, line width=3pt] (-0.03, 1) -- (0.25, 1);
-                            \node[above left, dotred, font=\small] at (0, 1.0) {$y=1$};
+                            \node[above left, dotred, font=\small] at (0, 1.0) {$1$};
 
-                            \addplot [dotred, mark=*, mark size=5pt] coordinates {(0,0)};
+                            \addplot [CurveBlue!50, mark=*, mark size=5pt] coordinates {(0,0)};
 
                             \addplot [dotred, mark=*, mark size=5pt, only marks] coordinates {
                                     (0.1273, 1) (0.0707, 1) (0.0489, 1)
@@ -243,7 +244,6 @@ noncomputable def xs_pos_peak :=
                     \end{tikzpicture}
                     \caption{The sequence of peaks \texttt{xs\_pos\_peak} isolating $y = 1$.}
                 \end{figure}
-
                 As $k \to \infty$, these peaks approach $0$ and enter $[0, a]$. Since the path covers this interval, there must be a time $t' \in [t_0, t_1]$ where the path hits a peak:
 
                 \begin{lstlisting}
@@ -271,7 +271,7 @@ theorem T_is_conn_not_pathconn :
   IsConnected T ∧ ¬IsPathConnected T := ⟨T_is_conn, T_is_not_path_conn⟩
     \end{lstlisting}
 
-                A version of this formalization has been accepted into
+                A stronger version of this formalization has been accepted into
                 \textbf{Mathlib} and is now part of the official counterexamples library:\\
                 \texttt{Mathlib/Counterexamples/TopologistsSineCurve}
 
