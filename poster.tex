@@ -1,18 +1,19 @@
 \documentclass{beamer}
 
 \usepackage[size=a0,scale=1.25]{beamerposter}
-
 \usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
-
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usepackage{pgfplots}
 \usepackage{listings}
-
 \usepackage{qrcode}
-
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    urlcolor=UniBlue
+}
 \usepackage{caption}
 \captionsetup{font=small, labelfont={bf, color=UniBlue}, justification=centering}
 
@@ -74,18 +75,16 @@
             \raggedright
             {\Huge \textbf{\textcolor{UniBlue}{\inserttitle}} \par}
             \vspace{0.4cm} 
-            {\LARGE \textit{\textbf{\textcolor{UniBlue}{\insertauthor}}} \par}
+            {\large \textit{\textbf{\textcolor{UniBlue}{\insertauthor}}} \par}
             \vspace{0.2cm} 
-            % --- NEW: Added the Date/Thesis type here ---
-            {\Large \textcolor{UniBlue}{\insertdate} \par}
+            {\large \textcolor{CurveBlue}{\insertdate} \par}
             \vspace{0.1cm} 
-            % --- Changed to \large for a nice visual hierarchy ---
-            {\large \textcolor{UniBlue}{\insertinstitute} \par}
+            {\large \textcolor{CurveBlue}{\insertinstitute} \par}
         \end{column}
         
         \begin{column}{0.25\paperwidth}
             \raggedleft
-            \includegraphics[height=7.5cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
+            \includegraphics[height=9.5cm, keepaspectratio]{Unidistance_Logo_Couleur_CMYK.pdf}
         \end{column}
         
         \begin{column}{0.04\paperwidth}\end{column}
@@ -108,7 +107,7 @@
     {\color{black}} 
 }
 \setbeamertemplate{block end}{
-    \vspace{2.5ex} 
+    \vspace{0.5ex} 
 }
 
 % ----------------------------------------------------
@@ -133,17 +132,59 @@
         % COLUMN 1: Setup & Graph & Part 1 Intro
         % ------------------------------------------------
         \begin{column}{0.31\textwidth}
+            \begin{block}{Connectivity}
+                A \textbf{topological space} $X$ is:
 
+                \vspace{0.8em}
+
+                \begin{minipage}[t]{0.47\linewidth}
+                    \centering
+                    \textbf{\large \textcolor{UniBlue}{Connected}}\\[0.5em]
+                    Cannot be split into two disjoint non-empty open sets.\\[1.2em]
+                    \begin{tikzpicture}[scale=3.0]
+                        \draw[UniBlue, line width=2pt, fill=LineBlue]
+                        plot[smooth cycle, tension=0.7]
+                        coordinates {(0.0, 0.5) (0.4, 1.0) (1.0, 0.75) (1.6, 1.0) (2.0, 0.5) (1.6, 0.0) (1.0, 0.25) (0.4, 0.0)};
+                        \node[font=\normalsize] at (1.0, 0.5) {$X$};
+                    \end{tikzpicture}
+                \end{minipage}
+                \hfill
+                \begin{minipage}[t]{0.47\linewidth}
+                    \centering
+                    \textbf{\large \textcolor{UniBlue}{Path-Connected}}\\[0.5em]
+                    Any two points can be joined by a continuous path $\gamma : [0,1] \to X$.\\[1.2em]
+                    \begin{tikzpicture}[scale=3.0]
+                        \draw[UniBlue, line width=2pt, fill=LineBlue]
+                        plot[smooth cycle, tension=0.7]
+                        coordinates {(0.0, 0.5) (0.4, 1.0) (1.0, 0.75) (1.6, 1.0) (2.0, 0.5) (1.6, 0.0) (1.0, 0.25) (0.4, 0.0)};
+
+                        \draw[dotred, line width=2.5pt]
+                        plot[smooth, tension=0.8]
+                        coordinates {(0.4, 0.5) (0.7, 0.6) (1.3, 0.4) (1.6, 0.5)};
+
+                        \fill[dotred] (0.4, 0.5) circle (1.5pt) node[left=1pt, font=\normalsize] {$a$};
+                        \fill[dotred] (1.6, 0.5) circle (1.5pt) node[right=1pt, font=\normalsize] {$b$};
+                        \node[dotred, font=\normalsize, above] at (0.5, 0.5) {$\gamma$};
+                    \end{tikzpicture}
+                \end{minipage}
+
+                \vspace{1.2em}
+
+                It is well known that:
+
+
+                $$
+                    \text{Path-Connected} \;\Rightarrow\; \text{Connected}
+                $$
+
+
+                The \textbf{converse does not hold}. The topologist's sine curve is the classical counterexample.
+            \end{block}
             \begin{block}{Introduction \& Setup}
-                The \textbf{topologist's sine curve} is a classical counterexample in topology illustrating that:
+                The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$.
+                Adding the origin produces the space $T = S \cup \{(0,0)\}$.
 
-
-                $$
-                    \text{Connected} \;\not\Rightarrow\; \text{Path Connected}.
-                $$
-
-
-                We define the sets as subsets of $\mathbb{R}^2$:
+                We formalize these sets as subsets of $\mathbb{R}^2$, in Lean:
 
                 \begin{lstlisting}
 def pos_real := Ioi (0 : ℝ) -- (0, ∞)
@@ -151,56 +192,51 @@ noncomputable def sine_curve := fun x ↦ (x, sin (x⁻¹))
 def S : Set (ℝ × ℝ) := sine_curve '' pos_real
 def Z : Set (ℝ × ℝ) := { (0, 0) }
 def T : Set (ℝ × ℝ) := S ∪ Z
-\end{lstlisting}
+    \end{lstlisting}
 
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
-                        \begin{axis}[sine axis]
-                            \addplot [CurveBlue, thick, domain=0.1:1.15, samples=150] {sin(deg(1/x))};
+                        \begin{axis}[
+                                sine axis,
+                                axis equal image=false,
+                                xmin=-0.03, xmax=0.27,
+                                height=0.35\linewidth
+                            ]
+                            \addplot [CurveBlue, thick, domain=0.1:0.26, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue, thick, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
                             \addplot [dotred, mark=*, mark size=4pt] coordinates {(0,0)};
 
-                            \draw[gray, thick] (-0.05, 1) -- (0.05, 1);
-                            \node[left, font=\small, text=gray] at (-0.05, 1) {$1$};
-                            \draw[gray, thick] (-0.05, -1) -- (0.05, -1);
-                            \node[left, font=\small, text=gray] at (-0.05, -1) {$-1$};
+                            \draw[gray, thick] (-0.006, 1) -- (0.006, 1);
+                            \node[left, font=\small, text=gray] at (-0.006, 1) {$1$};
+                            \draw[gray, thick] (-0.006, -1) -- (0.006, -1);
+                            \node[left, font=\small, text=gray] at (-0.006, -1) {$-1$};
                         \end{axis}
                     \end{tikzpicture}
                     \caption{Graph of $T$}
                 \end{figure}
-
-                The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$. Adding the origin produces the space $T = S \cup \{(0,0)\}$.
             \end{block}
 
             \begin{block}{Part 1: $T$ is Connected}
-                $S$ is connected because it is the continuous image of $(0, \infty)$.
-                Since every subset between a connected space and its closure is connected
-                ($S \subseteq T \subseteq \overline{S}$), $T$ must also be connected.
+                $S$ is connected as the continuous image of $(0,\infty)$.
+                A subset between a connected set and its closure is connected
+                ($S \subseteq T \subseteq \overline{S}$).
+                For the latter inclusion, it suffices to show $(0,0) \in \overline{S}$.
+                This follows from the sequence
+                $f(n) = \bigl(\tfrac{1}{n\pi},\, 0\bigr) \in S$ converging to the origin:
 
-                To prove $(0,0) \in \overline{S}$, we construct the sequence $f(n) = (\frac{1}{n\pi}, 0)$ and with
-                \texttt{Tendsto}, we prove the closure limit:
                 \begin{lstlisting}
 let f : ℕ → ℝ × ℝ := fun n => ((n * Real.pi)⁻¹, 0)
 lemma T_sub_cls_S : T ⊆ closure S := ... -- via Tendsto f
-\end{lstlisting}
-                We compress the argument using
-                \texttt{IsConnected.subset\_closure}, requiring three proofs:
-                \begin{itemize}
-                    \item \textbf{$S$ is connected:} Chaining continuity lemmas via (\texttt{<|}).
-                    \item \textbf{$S \subseteq T$:} Solved trivially by \texttt{tauto\_set}.
-                    \item \textbf{$T \subseteq \overline{S}$:} Provided by \texttt{T\_sub\_cls\_S}.
-                \end{itemize}
 
-                \begin{lstlisting}[language=lean]
 theorem T_is_conn : IsConnected T :=
   IsConnected.subset_closure (isConnected_Ioi.image sine_curve <|
     continuous_id.continuousOn.prodMk <|
     Real.continuous_sin.comp_continuousOn <|
     ContinuousOn.inv₀ continuous_id.continuousOn
     (fun _ hx => ne_of_gt hx)) (by tauto_set) T_sub_cls_S
-\end{lstlisting}
+    \end{lstlisting}
             \end{block}
         \end{column}
 
@@ -212,52 +248,71 @@ theorem T_is_conn : IsConnected T :=
                 If a path connects $S$ to $Z$, its $y$-coordinate
                 must oscillate infinitely between $-1$ and $1$ as its $x$-coordinate approaches $0$.
                 This infinite oscillation contradicts the continuity of the path.
-                We formalize this by contradiction:
+                We formalize this by contradiction.
+
+                In Mathlib, path-connectedness is defined via \texttt{JoinedIn}:
+                \begin{lstlisting}
+def IsPathConnected (F : Set X) : Prop :=
+  ∃ x ∈ F, ∀ ⦃y⦄, y ∈ F → JoinedIn F x y
+
+def JoinedIn (S : Set X) (x y : X) : Prop :=
+  ∃ γ : Path x y, ∀ t, γ t ∈ S
+        \end{lstlisting}
+
+                We assume $T$ is path-connected and extract a continuous path
+                $p : [0,1] \to T$ between $(0,0)$ and $(1, \sin 1)$:
 
                 \begin{lstlisting}[language=lean]
 theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
   intro p_conn
-  -- Extract a continuous path p : [0,1] -> T 
   let p := JoinedIn.somePath p_conn
-\end{lstlisting}
+        \end{lstlisting}
 
-                We define $t_0$ as the \textit{last time} the path lies on the $y$-axis:
+                We define $t_0$ as the \textit{last time} the path lies on the $y$-axis
+                (using \texttt{sSup} rather than \texttt{sInf} simplifies later arguments):
                 \begin{lstlisting}
   let t₀ : unitInterval := sSup {t | (p t).1 = 0}
-\end{lstlisting}
+        \end{lstlisting}
 
-                By continuity at $t_0$, for $\varepsilon = 1/2$, there exists a $\delta > 0$ such that the path remains strictly inside a ball of radius $1/2$:
+                By continuity at $t_0$, for $\varepsilon = 1/2$, there exists $\delta > 0$ such that the path stays inside a ball of radius $1/2$:
 
                 \begin{lstlisting}
   obtain ⟨δ, hδ, ht⟩ : ∃ δ > 0, ∀ t,
     dist t t₀ < δ → dist (p t) (p t₀) < 1/2
-\end{lstlisting}
+        \end{lstlisting}
 
-                Immediately after $t_0$, the path enters $S$.
-                We find a time $t_1 > t_0$ in the $\delta$-neighborhood,
-                giving a point $a = x(p(t_1)) > 0$, where $x$ is the $x$-coordinate
-                function.
-                The image $x(p([t_0, t_1]))$ is connected and contains $0 = x(p(t_0))$
-                and $a = x(p(t_1))$. Since every connected subset of $\mathbb{R}$ is an interval,
-                $[0, a] \subseteq x(p([t_0, t_1]))$.
+                We find a time $t_1 \in (t_0, t_0 + \delta)$.
+                Since $t_1 > t_0$ and $t_0$ is the \emph{last} time on the $y$-axis,
+                $p(t_1)$ must lie in $S$ (if it were in $Z$, then $t_1 \leq t_0$, a contradiction).
+                This gives $a = x(p(t_1)) > 0$.
+
+                The image $x(p([t_0, t_1]))$ is connected and contains
+                $b = 0 = x(p(t_0))$ and $a = x(p(t_1))$.
+                Since every connected subset of $\mathbb{R}$ is an interval,
+                $[0, a] \subseteq x(p([t_0, t_1]))$:
 
                 \begin{lstlisting}[language=lean]
   have Icc_of_a_b_sub_Icc_t₀_t₁: 
     Set.Icc 0 a ⊆ xcoord_path '' Set.Icc t₀ t₁ :=
       IsConnected.Icc_subset ...
-\end{lstlisting}
+        \end{lstlisting}
 
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
-                        \begin{axis}[sine axis, xmin=-0.65, xmax=0.65, ymin=-0.65, ymax=0.65]
-
-                            \addplot [CurveBlue!50, thin, domain=0.1:0.65, samples=150] {sin(deg(1/x))};
+                        \begin{axis}[
+                                sine axis,
+                                xmin=-0.60, xmax=0.60,
+                                ymin=-0.60, ymax=0.60
+                            ]
+                            \addplot [CurveBlue!50, thin, domain=0.1:0.60, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue!50, thin, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            \draw [dotred, line width=3pt, dashed] (0,0) circle [radius=0.5];
+                            \draw [dotred, line width=3pt, dashed]
+                            (-0.5,-0.5) rectangle (0.5,0.5);
 
-                            \draw [gray, line width=2pt, ->] (0,0) -- (-0.25, 0.433) node[midway, left=4pt, font=\small, text=gray] {$1/2$};
+                            \draw [gray, line width=2pt, ->] (0,0) -- (0.5, 0)
+                            node[midway, below=4pt, font=\small, text=gray] {$1/2$};
                             \draw [gray, line width=2pt, dashed] (0.153,0.25) -- (0.153,0);
 
                             \draw [dotred, line width=4pt] (0,0) -- (0.153,0);
@@ -269,10 +324,9 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                             \node[above right, dotred, font=\small] at (0.153,0.25) {$p(t_1)$};
 
                             \node[below, font=\small, dotred] at (0.153,-0.05) {$a$};
-
                         \end{axis}
                     \end{tikzpicture}
-                    \caption{The $\varepsilon$-ball around $p(t_0)$ contains $p(t_1)$ and covers the interval $[0, a]$.}
+                    \caption{The $\varepsilon$-ball around $p(t_0)$. Balls are squares since Mathlib uses the $L^\infty$ norm on $\mathbb{R}^2$.}
                 \end{figure}
             \end{block}
         \end{column}
@@ -293,18 +347,23 @@ noncomputable def xs_pos_peak :=
                 \begin{figure}
                     \centering
                     \begin{tikzpicture}
-                        \begin{axis}[sine axis, xmin=-0.1, xmax=0.8, ymin=0.0, ymax=1.25]
-
-                            \addplot [CurveBlue!50, thin, domain=0.1:0.8, samples=150] {sin(deg(1/x))};
+                        \begin{axis}[
+                                sine axis,
+                                axis equal image=false,
+                                xmin=-0.03, xmax=0.25,
+                                ymin=0.0, ymax=1.25,
+                                height=0.35\linewidth
+                            ]
+                            \addplot [CurveBlue!50, thin, domain=0.1:0.25, samples=150] {sin(deg(1/x))};
                             \addplot [CurveBlue!50, thin, domain=0.005:0.1, samples=850] {sin(deg(1/x))};
 
-                            \draw[dotred, dashed, line width=3pt] (-0.1, 1) -- (0.8, 1);
+                            \draw[dotred, dashed, line width=3pt] (-0.03, 1) -- (0.25, 1);
                             \node[above left, dotred, font=\small] at (0, 1.0) {$y=1$};
 
                             \addplot [dotred, mark=*, mark size=5pt] coordinates {(0,0)};
 
                             \addplot [dotred, mark=*, mark size=5pt, only marks] coordinates {
-                                    (0.6366, 1) (0.1273, 1) (0.0707, 1) (0.0489, 1)
+                                    (0.1273, 1) (0.0707, 1) (0.0489, 1)
                                     (0.0374, 1) (0.0303, 1) (0.0254, 1) (0.0219, 1) (0.0192, 1)
                                 };
                         \end{axis}
@@ -337,26 +396,36 @@ have far : 1 ≤ dist (p t') (p t₀) := by
                 \begin{lstlisting}
 theorem T_is_conn_not_pathconn :
   IsConnected T ∧ ¬IsPathConnected T := ⟨T_is_conn, T_is_not_path_conn⟩
-\end{lstlisting}
+    \end{lstlisting}
 
-                The formalization strictly follows K. Conrad's paper \textit{Connected but not Path-Connected}. Mathlib largely mirrors this informal reasoning:
+                A version of this formalization has been accepted into
+                \textbf{Mathlib} and is now part of the official counterexamples library:\\
+                \texttt{Mathlib/Counterexamples/TopologistsSineCurve}
+
+                \vspace{0.5em}
+
+                This formalization strictly follows K.\ Conrad's paper [1]. Mathlib largely mirrors this informal reasoning:
                 \texttt{T\_is\_not\_path\_conn} naturally uses contradiction,
                 filters (\texttt{Tendsto}) intuitively handle limits, and the metric space
                 \texttt{dist} was conveniently used.
+                Working with the \texttt{unitInterval} subtype required cumbersome explicit casting.
 
-                Working with the \texttt{unitInterval} subtype, required cumbersome explicit casting.
-
-                Ultimately, these compiling lines stand as a verified witness, showcasing how formal reasoning
-                makes mathematics rigorous and automatically verifiable.
-
-                \vspace{1.0cm}
+                \vspace{0.6cm}
 
                 \begin{center}
-                    \qrcode[height=3.5cm]{https://github.com/daniele-bolla/intro_to_formal_math_in_lean/blob/main/main.pdf} \\
-                    \vspace{0.3cm}
+                    \qrcode[height=3cm]{https://github.com/daniele-bolla/intro_to_formal_math_in_lean/blob/main/main.pdf} \\
+                    \vspace{0.2cm}
                     \textbf{\small Read the full thesis}
                 \end{center}
 
+                \vspace{0.1cm}
+                \rule{\linewidth}{0.4pt}
+                \vspace{0.1cm}
+
+                {\small
+                    \textbf{[1]} K.\ Conrad, \textit{Connected but not Path-Connected},\\
+                    \url{https://kconrad.math.uconn.edu/blurbs/topology/connnotpathconn.pdf}
+                }
             \end{block}
 
         \end{column}
