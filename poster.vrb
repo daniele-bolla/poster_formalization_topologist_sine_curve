@@ -277,11 +277,12 @@ theorem T_is_conn_not_pathconn :
 
                 \vspace{0.5em}
 
-                This formalization strictly follows K.\ Conrad's paper [1]. Mathlib largely mirrors this informal reasoning:
-                \texttt{T\_is\_not\_path\_conn} naturally uses contradiction,
+                This formalization strictly follows K.\ Conrad's paper [1].
+                Mathlib provided natural tools for translating this informal reasoning:
+                \texttt{T\_is\_not\_path\_conn} directly uses contradiction,
                 filters (\texttt{Tendsto}) intuitively handle limits, and the metric space
                 \texttt{dist} was conveniently used.
-                Working with the \texttt{unitInterval} subtype required cumbersome explicit casting.
+                However, working with the \texttt{unitInterval} subtype required cumbersome explicit casting.
 
                 \vspace{0.6cm}
 
