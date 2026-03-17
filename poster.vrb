@@ -53,6 +53,7 @@
 
                 The \textbf{converse does not hold}. The topologist's sine curve is the classical counterexample.
             \end{block}
+
             \begin{block}{Introduction \& Setup}
                 The curve $S = \{(x,\sin(1/x)) : x > 0\}$ oscillates infinitely as $x \to 0$.
                 Adding the origin produces the space $T = S \cup \{(0,0)\}$.
@@ -93,12 +94,12 @@ def T : Set (ℝ × ℝ) := S ∪ Z
 
             \begin{block}{Part 1: $T$ is Connected}
                 $S$ is connected as the continuous image of $(0,\infty)$.
-                A subset between a connected set and its closure is connected
+                \texttt{IsConnected.subset\_closure} from \textbf{Mathlib} captures the fact that a subset between a connected set and its closure is connected
                 ($S \subseteq T \subseteq \overline{S}$).
                 While the inclusion $S \subseteq T$ is trivially closed by the \texttt{tauto\_set} tactic,
                 establishing $T \subseteq \overline{S}$ requires to prove $(0,0) \in \overline{S}$.
                 We achieve this by showing the sequence
-                $f(n) = \bigl(\tfrac{1}{n\pi},\, 0\bigr) \in S$ converges to the origin:
+                $f(n) = \bigl(\tfrac{1}{n\pi},\, 0\bigr) \in S$ converges to the origin (via \textbf{Filter} \texttt{Tendsto} ):
 
                 \begin{lstlisting}
 let f : ℕ → ℝ × ℝ := fun n => ((n * Real.pi)⁻¹, 0)
@@ -122,8 +123,8 @@ theorem T_is_conn : IsConnected T :=
                 If a path connects $S$ to $Z$, its $y$-coordinate
                 must oscillate infinitely between $-1$ and $1$ as its $x$-coordinate approaches $0$.
                 This infinite oscillation contradicts the continuity of the path.
-                We formalize this by contradiction.
 
+                We formalize this by contradiction.
                 In Mathlib, path-connectedness is defined via \texttt{JoinedIn}:
                 \begin{lstlisting}
 def IsPathConnected (F : Set X) : Prop :=
@@ -148,7 +149,7 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
   let t₀ : unitInterval := sSup {t | (p t).1 = 0}
         \end{lstlisting}
 
-                By continuity at $t_0$, for $\varepsilon = 1/2$, there exists $\delta > 0$ such that the path stays inside a ball of radius $1/2$:
+                By continuity at $t_0$, for $\varepsilon = 1/2$, there exists $\delta > 0$ such that the path stays inside a ball of radius $1/2$ \textbf{\textcolor{UniBlue}{[a]}}:
 
                 \begin{lstlisting}
   obtain ⟨δ, hδ, ht⟩ : ∃ δ > 0, ∀ t,
@@ -161,9 +162,10 @@ theorem T_is_not_path_conn : ¬ (IsPathConnected T) := by
                 This gives $a = x(p(t_1)) > 0$.
 
                 The image $x(p([t_0, t_1]))$ is connected and contains
-                $b = 0 = x(p(t_0))$ and $a = x(p(t_1))$.
+                $0 = x(p(t_0))$ and $a = x(p(t_1))$.
+
                 Since every connected subset of $\mathbb{R}$ is an interval,
-                $[0, a] \subseteq x(p([t_0, t_1]))$:
+                $[0, a] \subseteq x(p([t_0, t_1]))$ \textbf{\textcolor{UniBlue}{[b]}}:
 
                 \begin{lstlisting}[language=lean]
   have Icc_of_a_b_sub_Icc_t₀_t₁:
@@ -244,14 +246,14 @@ noncomputable def xs_pos_peak :=
                     \end{tikzpicture}
                     \caption{The sequence of peaks \texttt{xs\_pos\_peak} isolating $y = 1$.}
                 \end{figure}
-                As $k \to \infty$, these peaks approach $0$ and enter $[0, a]$. Since the path covers this interval, there must be a time $t' \in [t_0, t_1]$ where the path hits a peak:
+                As $k \to \infty$, these peaks approach $0$ and enter $[0, a]$. Since the path covers this interval (\textbf{\textcolor{UniBlue}{[b]}}), there must be a time $t' \in [t_0, t_1]$ where the path hits a peak:
 
                 \begin{lstlisting}
 obtain ⟨t', ht', hpath_t'⟩ :
   ∃ t' ∈ Set.Icc t₀ t₁, (p t').2 = 1 := ...
 \end{lstlisting}
 
-                Because $t' \in [t_0, t_1]$, our earlier continuity argument requires the distance to the origin to be $< 1/2$. However, using \texttt{calc}, we prove the distance must be at least $1$ since the $y$-coordinate is $1$:
+                Because $t' \in [t_0, t_1]$ (so $t'$ is within $\delta$ of $t_0$), our earlier continuity argument (\textbf{\textcolor{UniBlue}{[a]}}) requires the distance to the origin to be $< 1/2$. However, using \texttt{calc}, we prove the distance must be at least $1$ since the $y$-coordinate is $1$:
 
                 \begin{lstlisting}[language=lean]
 have far : 1 ≤ dist (p t') (p t₀) := by
@@ -271,16 +273,16 @@ theorem T_is_conn_not_pathconn :
   IsConnected T ∧ ¬IsPathConnected T := ⟨T_is_conn, T_is_not_path_conn⟩
     \end{lstlisting}
 
-                A stronger version (which considers  $T = \overline{S}$ ) of this formalization has been accepted into
-                \textbf{Mathlib} and is now part of the official counterexamples library:\\
+                A stronger version (which considers $T = \overline{S}$) of this formalization has been \textbf{merged into
+                    Mathlib} as part of the official counterexamples library:\\
                 \texttt{Mathlib/Counterexamples/TopologistsSineCurve}
 
                 \vspace{0.5em}
 
                 This formalization strictly follows K.\ Conrad's paper [1].
-                Mathlib provided natural tools for translating this informal reasoning:
+                Mathlib provided tools for translating this informal reasoning:
                 \texttt{T\_is\_not\_path\_conn} directly uses contradiction,
-                filters (\texttt{Tendsto}) intuitively handle limits, and the metric space
+                Filters (like \texttt{Tendsto}) intuitively handle limits, and the metric space
                 \texttt{dist} was conveniently used.
                 However, working with the \texttt{unitInterval} subtype required cumbersome explicit casting.
 
